@@ -10,14 +10,16 @@ export interface BarcodePayload {
 }
 
 export async function generateBarcode(payload: BarcodePayload): Promise<Buffer> {
-    const canvas = createCanvas(400, 150);
+    const canvas = createCanvas(200, 80);
     const data = JSON.stringify(payload);
 
     JsBarcode(canvas, data, {
         format: 'CODE128',
         displayValue: true,
-        fontSize: 12,
-        margin: 10,
+        fontSize: 10,
+        margin: 5,
+        width: 2,
+        height: 40,
     });
 
     return canvas.toBuffer('image/png');
