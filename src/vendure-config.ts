@@ -1,20 +1,22 @@
 import 'dotenv/config';
 import path from 'path';
 
+import { AssetServerPlugin, configureS3AssetStorage } from '@vendure/asset-server-plugin';
 import {
-    dummyPaymentHandler,
+    cleanSessionsTask,
+    DefaultAssetNamingStrategy,
     DefaultJobQueuePlugin,
     DefaultSchedulerPlugin,
     DefaultSearchPlugin,
+    dummyPaymentHandler,
     VendureConfig,
-    DefaultAssetNamingStrategy,
-    cleanSessionsTask,
 } from '@vendure/core';
-import { defaultEmailHandlers, EmailPlugin, FileBasedTemplateLoader } from '@vendure/email-plugin';
-import { AssetServerPlugin, configureS3AssetStorage } from '@vendure/asset-server-plugin';
-import { GraphiqlPlugin } from '@vendure/graphiql-plugin';
 import { DashboardPlugin } from '@vendure/dashboard/plugin';
+import { defaultEmailHandlers, EmailPlugin, FileBasedTemplateLoader } from '@vendure/email-plugin';
+import { GraphiqlPlugin } from '@vendure/graphiql-plugin';
 import { BrandingPlugin } from './plugins/branding/branding.plugin';
+import { OrderPlugin } from './plugins/order/order.plugin';
+import { ReviewsPlugin } from './plugins/reviews/review.plugin';
 
 const IS_DEV = process.env.APP_ENV === 'dev';
 const IS_EMAIL_DEV = process.env.EMAIL_ENV === 'dev';
@@ -50,7 +52,7 @@ export const config: VendureConfig = {
         type: 'postgres',
         // See the README.md "Migrations" section for an explanation of
         // the `synchronize` and `migrations` options.
-        synchronize: false,
+        synchronize: true,
         migrations: [path.join(__dirname, './migrations/*.+(js|ts)')],
         logging: false,
         database: process.env.DB_NAME,
@@ -67,6 +69,8 @@ export const config: VendureConfig = {
         tasks: [cleanSessionsTask],
     },
     plugins: [
+        ReviewsPlugin,
+        OrderPlugin,
         AssetServerPlugin.init({
             route: 'assets',
             assetUploadDir: path.join(__dirname, '../static/assets'),
